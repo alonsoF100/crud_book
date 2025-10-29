@@ -2,63 +2,181 @@ package handlers
 
 import (
 	"crud_book/storage"
-	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(s *storage.Storage) {
-	// Обработка /users (GET и POST)
-	http.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "POST":
-			CreateUserHandler(s, w, r) // POST /users - создание пользователя
-		case "GET":
-			GetAllUsersHandler(s, w, r) // GET /users - все пользователи
-		default:
-			http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
-		}
-	})
+type Handler struct {
+	storage *storage.Storage
+}
 
-	// Обработка /books (только POST)
-	http.HandleFunc("/books", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
-			CreateBookHandler(s, w, r) // POST /books - создание книги
-		} else {
-			http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
-		}
-	})
+func New(storage *storage.Storage) *Handler {
+	return &Handler{storage: storage}
+}
 
-	// Обработка /users/...
-	http.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
-		pathParts := strings.Split(r.URL.Path, "/")
+// Хендлеры для book
 
-		switch {
-		case len(pathParts) == 4 && pathParts[3] == "books":
-			GetUserBooksHandler(s, w, r) // GET /users/:id/books - книги пользователя
-		case len(pathParts) == 3 && r.Method == "GET":
-			GetUserHandler(s, w, r) // GET /users/:id - получение пользователя
-		case len(pathParts) == 3 && r.Method == "DELETE":
-			DeleteUserHandler(s, w, r) // DELETE /users/:id - удаление пользователя
-		default:
-			http.NotFound(w, r)
-		}
-	})
+func (h *Handler) CreateBook(c *gin.Context) {
+	type CreateBookRequest struct {
+		UserID      string `json:"user_id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+	var req CreateBookRequest
 
-	// Обработка /books/...
-	http.HandleFunc("/books/", func(w http.ResponseWriter, r *http.Request) {
-		pathParts := strings.Split(r.URL.Path, "/")
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		return
+	}
 
-		switch {
-		case len(pathParts) == 4 && pathParts[3] == "status":
-			UpdateBookStatusHandler(s, w, r) // PUT /books/:id/status - обновление статуса
-		case len(pathParts) == 4 && pathParts[3] == "rating":
-			UpdateBookRatingHandler(s, w, r) // PUT /books/:id/rating - обновление рейтинга
-		case len(pathParts) == 3 && r.Method == "GET":
-			GetBookHandler(s, w, r) // GET /books/:id - получение книги
-		case len(pathParts) == 3 && r.Method == "DELETE":
-			DeleteBookHandler(s, w, r) // DELETE /books/:id - удаление книги
-		default:
-			http.NotFound(w, r)
-		}
-	})
+	book, err := h.storage.AddBook(req.UserID, req.Name, req.Description)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(201, book)
+}
+
+func (h *Handler) GetUserBooks(c *gin.Context) {
+	userID := c.Param("id")
+
+	books, err := h.storage.GetUserBooks(userID)
+	if err != nil {
+		c.JSON(404, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, books)
+}
+
+func (h *Handler) UpdateBookStatus(c *gin.Context) {
+	type UpdateBookStatusRequest struct {
+		Status string `json:"status"`
+	}
+	var req UpdateBookStatusRequest
+
+	bookID := c.Param("id")
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		return
+	}
+
+	err := h.storage.UpdateBookStatus(bookID, req.Status)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	book, err := h.storage.GetBook(bookID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "не удалось получить обновленную книгу"})
+		return
+	}
+	c.JSON(200, book)
+}
+
+func (h *Handler) UpdateBookRating(c *gin.Context) {
+	type UpdateBookRatingRequest struct {
+		Rating float64 `json:"rating"`
+	}
+	var req UpdateBookRatingRequest
+
+	bookID := c.Param("id")
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		return
+	}
+
+	err := h.storage.UpdateBookRating(bookID, req.Rating)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	book, err := h.storage.GetBook(bookID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "не удалось получить обновленную книгу"})
+		return
+	}
+	c.JSON(200, book)
+}
+
+func (h *Handler) DeleteBook(c *gin.Context) {
+	bookID := c.Param("id")
+
+	err := h.storage.DeleteBook(bookID)
+	if err != nil {
+		c.JSON(404, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(204)
+}
+
+func (h *Handler) GetBook(c *gin.Context) {
+	bookID := c.Param("id")
+
+	book, err := h.storage.GetBook(bookID)
+	if err != nil {
+		c.JSON(404, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, book)
+}
+
+// Хендлеры для user
+
+func (h *Handler) CreateUser(c *gin.Context) {
+	type CreateUserRequest struct {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+	var req CreateUserRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		return
+	}
+
+	user, err := h.storage.AddUser(req.Name, req.Email)
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(201, user)
+}
+
+func (h *Handler) GetUser(c *gin.Context) {
+	userID := c.Param("id")
+
+	user, err := h.storage.GetUser(userID)
+	if err != nil {
+		c.JSON(404, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, user)
+}
+
+func (h *Handler) DeleteUser(c *gin.Context) {
+	userID := c.Param("id")
+
+	err := h.storage.DeleteUser(userID)
+	if err != nil {
+		c.JSON(404, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(204)
+}
+
+func (h *Handler) GetAllUsers(c *gin.Context) {
+	users := h.storage.GetAllUsers()
+
+	c.JSON(200, users)
 }
