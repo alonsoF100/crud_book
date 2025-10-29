@@ -3,12 +3,12 @@ package main
 import (
 	"crud_book/handlers"
 	"crud_book/storage"
-	"net/http"
 )
 
 func main() {
 	storage := storage.NewStorage()
-	handlers.SetupRoutes(storage)
+	handler := handlers.New(storage)
+	router := handlers.SetupRouter(handler)
 
-	http.ListenAndServe(":8080", nil)
+	router.Run(":8080")
 }
