@@ -2,14 +2,14 @@ package storage
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 )
 
 type Book struct {
@@ -28,7 +28,7 @@ type User struct {
 }
 
 type Storage struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
 func NewConnect() *Storage {
@@ -37,7 +37,7 @@ func NewConnect() *Storage {
 		fmt.Println(".env file not found")
 	}
 
-	db, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	db, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("cant connect to database %v", err)
 	}
@@ -51,10 +51,25 @@ func NewConnect() *Storage {
 }
 
 func (s *Storage) Close() {
-	err := s.db.Close(context.Background())
+	s.db.Close()
+}
+
+func (s *Storage) RunMigrations() error {
+	godotenv.Load()
+
+	db, err := goose.OpenDBWithDriver("pgx", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatalf("failed to disconnect %v", err)
+		return fmt.Errorf("open db for migrations: %w", err)
 	}
+	defer db.Close()
+
+	err = goose.Up(db, "migrations")
+	if err != nil {
+		return fmt.Errorf("run migrations: %w", err)
+	}
+
+	log.Println("Migrations applied successfully")
+	return nil
 }
 
 func (s *Storage) AddUser(name, email string) (*User, error) {
@@ -81,7 +96,7 @@ func (s *Storage) GetUser(userID string) (*User, error) {
 	var user User
 	err := s.db.QueryRow(context.Background(), query, userID).Scan(&user.ID, &user.Name, &user.Email)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if err.Error() == "no rows in result set" {
 			return nil, fmt.Errorf("failed to find user with ID: %s", userID)
 		}
 
@@ -206,7 +221,7 @@ func (s *Storage) GetBook(bookID string) (*Book, error) {
 	var book Book
 	err := s.db.QueryRow(context.Background(), query, bookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if err.Error() == "no rows in result set" {
 			return nil, fmt.Errorf("failed to find book with ID: %s", bookID)
 		}
 
