@@ -1,10 +1,11 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 func SetupRouter(h *Handler) *gin.Engine {
 	r := gin.Default()
-
 	// Енд поинты для book
 
 	r.POST("/books", h.CreateBook)

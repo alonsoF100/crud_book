@@ -176,7 +176,11 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 }
 
 func (h *Handler) GetAllUsers(c *gin.Context) {
-	users := h.storage.GetAllUsers()
+	users, err := h.storage.GetAllUsers()
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to get users"})
+		return
+	}
 
 	c.JSON(200, users)
 }

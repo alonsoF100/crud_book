@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
-	storage := storage.NewStorage()
+	storage := storage.NewConnect()
+	defer storage.Close()
+
 	handler := handlers.New(storage)
 	router := handlers.SetupRouter(handler)
 
