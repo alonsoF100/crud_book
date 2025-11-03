@@ -92,7 +92,7 @@ func (s *Storage) GetUser(userID string) (*User, error) {
 }
 
 func (s *Storage) GetAllUsers() ([]*User, error) {
-	const query = `select id, name, email from users`
+	const query = `SELECT id, name, email FROM users`
 
 	rows, err := s.db.Query(context.Background(), query)
 	if err != nil {
@@ -133,110 +133,108 @@ func (s *Storage) DeleteUser(userID string) error {
 	return nil
 }
 
-// переделать на базу
-
 func (s *Storage) AddBook(userID, name, description string) (*Book, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	newID := uuid.New().String()
 
-	book := &Book{
-		ID:          uuid.New().String(),
-		UserID:      userID,
-		Name:        name,
-		Description: description,
-		Rating:      0,
-		Status:      "want",
+	const query = `INSERT INTO books (id, user_id, name, description)
+	               VALUES ($1, $2, $3, $4)
+				   RETURNING id, user_id, name, description, rating, status`
+	var book Book
+	err := s.db.QueryRow(context.Background(), query, newID, userID, name, description).
+		Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
+	if err != nil {
+		return nil, fmt.Errorf("create book: %w", err)
 	}
 
-	if _, exists := s.users[userID]; !exists {
-		return nil, fmt.Errorf("пользователь с ID %s не найден", userID)
-	}
-
-	s.books[book.ID] = book
-
-	return book, nil
+	return &book, nil
 }
 
 func (s *Storage) UpdateBookStatus(bookID, status string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	const query = `UPDATE books
+	               SET status = $1
+	               WHERE id = $2`
 
-	validStatuses := map[string]bool{
-		"want":     true,
-		"reading":  true,
-		"finished": true,
+	result, err := s.db.Exec(context.Background(), query, status, bookID)
+	if err != nil {
+		return fmt.Errorf("update book status: %w", err)
 	}
 
-	if !validStatuses[status] {
-		return fmt.Errorf("неверный статус: %s. Допустимые значения: want, reading, finished", status)
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("failed to find book with ID: %s", bookID)
 	}
-
-	book, exist := s.books[bookID]
-	if !exist {
-		return fmt.Errorf("неудалось найти книгу с ID: %s", bookID)
-	}
-
-	book.Status = status
 
 	return nil
 }
 
 func (s *Storage) UpdateBookRating(bookID string, rating float64) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	const query = `UPDATE books
+	               SET rating = $1
+				   WHERE id = $2`
 
-	if rating < 0 || rating > 5 {
-		return fmt.Errorf("рейтинг должен быть от 0 до 5")
+	result, err := s.db.Exec(context.Background(), query, rating, bookID)
+	if err != nil {
+		return fmt.Errorf("update book rating: %w", err)
 	}
 
-	book, exist := s.books[bookID]
-	if !exist {
-		return fmt.Errorf("неудалось найти книгу с ID: %s", bookID)
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("failed to find book with ID: %s", bookID)
 	}
-
-	book.Rating = rating
 
 	return nil
 }
 
 func (s *Storage) DeleteBook(bookID string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	const query = `DELETE FROM books
+	               WHERE id = $1`
 
-	if _, exist := s.books[bookID]; !exist {
-		return fmt.Errorf("неудалось найти книгу с ID: %s", bookID)
+	result, err := s.db.Exec(context.Background(), query, bookID)
+	if err != nil {
+		return fmt.Errorf("delete book: %w", err)
 	}
 
-	delete(s.books, bookID)
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("failed find book with ID: %s", bookID)
+	}
 
 	return nil
 }
 
 func (s *Storage) GetBook(bookID string) (*Book, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	const query = `SELECT id, user_id, name, description, rating, status
+	               FROM books WHERE id = $1`
 
-	book, exist := s.books[bookID]
-	if !exist {
-		return nil, fmt.Errorf("неудалось найти книгу с ID: %s", bookID)
+	var book Book
+	err := s.db.QueryRow(context.Background(), query, bookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("failed to find book with ID: %s", bookID)
+		}
+
+		return nil, fmt.Errorf("database error: %w", err)
 	}
 
-	return book, nil
+	return &book, nil
 }
 
 func (s *Storage) GetUserBooks(userID string) ([]*Book, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	const query = `SELECT id, user_id, name, description, rating, status FROM books
+	               WHERE user_id = $1`
 
-	if _, exist := s.users[userID]; !exist {
-		return nil, fmt.Errorf("неудалось найти пользователя с ID: %s", userID)
+	rows, err := s.db.Query(context.Background(), query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users books: %w", err)
 	}
+	defer rows.Close()
 
 	var userBooks []*Book
-	for _, book := range s.books {
-		if book.UserID == userID {
-			userBooks = append(userBooks, book)
+	for rows.Next() {
+		var book Book
+		err := rows.Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
+		if err != nil {
+			return nil, fmt.Errorf("scan book: %w", err)
 		}
+
+		userBooks = append(userBooks, &book)
 	}
 
 	return userBooks, nil
