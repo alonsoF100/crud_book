@@ -12,7 +12,7 @@ cd crud_book
 go mod tidy
 
 3. Настроить базу данных
-echo "DATABASE_URL=postgres://user:pass@localhost:5432/reading_diary" > .env
+echo "DATABASE_URL=postgres://user:pass@localhost:5432/library" > .env
 
 4. Запустить приложение
 go run main.go
@@ -74,33 +74,5 @@ DELETE /users/:id - Удалить пользователя
   "rating": 4.5,
   "status": "want|reading|finished"
 }
-
-## Примеры использования
-
-Создать пользователя:
-curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d '{"name":"Анна", "email":"anna@example.com"}'
-
-Создать книгу:
-curl -X POST http://localhost:8080/books -H "Content-Type: application/json" -d '{"user_id":"uuid", "name":"Книга", "description":"Описание"}'
-
-Обновить статус книги:
-curl -X PUT http://localhost:8080/books/uuid/status -H "Content-Type: application/json" -d '{"status":"finished"}'
-
-## Структура проекта
-
-crud_book/
-├── handlers/     # HTTP обработчики
-├── storage/      # Работа с базой данных
-├── migrations/   # SQL миграции
-├── main.go       # Точка входа
-└── README.md
-
-## Статусы книг
-
-- want - запланировано к прочтению
-- reading - в процессе чтения  
-- finished - прочитано
-
----
 
 ⭐ Не забудьте поставить звезду репозиторию если проект был полезен!
