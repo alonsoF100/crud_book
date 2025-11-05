@@ -75,4 +75,11 @@ DELETE /users/:id - Удалить пользователя
   "status": "want|reading|finished"
 }
 
+## API Testing
+
+Import Postman collection from `docs/postman/`:
+1. Import `Book_Diary_API.postman_collection.json`
+2. Import `Local_Dev.postman_environment.json`
+3. Select "Local Dev" environment
+
 ⭐ Не забудьте поставить звезду репозиторию если проект был полезен!
