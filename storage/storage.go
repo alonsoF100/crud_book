@@ -116,7 +116,7 @@ func (s *Storage) GetAllUsers() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	var users []*User
+	users := []*User{} 
 	for rows.Next() {
 		var user User
 		err := rows.Scan(&user.ID, &user.Name, &user.Email)
