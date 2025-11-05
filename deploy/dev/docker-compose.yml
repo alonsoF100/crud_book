@@ -5,8 +5,10 @@ services:
       dockerfile: deploy/dev/Dockerfile
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/library
+      - DATABASE_URL=${DOCKER_DATABASE_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -14,16 +16,18 @@ services:
 
   db:
     image: postgres:15
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=library
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -1,7 +1,7 @@
 include .env
 export
 
-GOOSE = goose -dir migrations postgres "${DATABASE_URL}"
+GOOSE = goose -dir migrations postgres "${LOCAL_DATABASE_URL}"
 
 # DOCKER COMMANDS
 

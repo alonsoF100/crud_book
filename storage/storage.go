@@ -38,7 +38,7 @@ func NewConnect() *Storage {
 		fmt.Println(".env file not found")
 	}
 
-	db, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	db, err := pgxpool.New(context.Background(), os.Getenv("LOCAL_DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("cant connect to database %v", err)
 	}
@@ -58,7 +58,7 @@ func (s *Storage) Close() {
 func (s *Storage) RunMigrations() error {
 	godotenv.Load()
 
-	db, err := goose.OpenDBWithDriver("pgx", os.Getenv("DATABASE_URL"))
+	db, err := goose.OpenDBWithDriver("pgx", os.Getenv("LOCAL_DATABASE_URL"))
 	if err != nil {
 		return fmt.Errorf("open db for migrations: %w", err)
 	}

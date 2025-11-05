@@ -12,7 +12,7 @@ cd crud_book
 go mod tidy
 
 3. Настроить базу данных
-echo "DATABASE_URL=postgres://user:pass@localhost:5432/library" > .env
+echo "LOCAL_DATABASE_URL=postgres://user:pass@localhost:5432/library" > .env
 
 4. Запустить приложение
 go run main.go
