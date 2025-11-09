@@ -1,1 +1,4 @@
 crud_book/.env
+
+.env
+*.env
