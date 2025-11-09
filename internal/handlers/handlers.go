@@ -136,7 +136,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.storage.AddUser(req.Name, req.Email)
+	user, err := h.userService.CreateUser(req.Name, req.Email)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -148,7 +148,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 func (h *Handler) GetUser(c *gin.Context) {
 	userID := c.Param("id")
 
-	user, err := h.storage.GetUser(userID)
+	user, err := h.userService.GetUser(userID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -160,7 +160,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 func (h *Handler) DeleteUser(c *gin.Context) {
 	userID := c.Param("id")
 
-	err := h.storage.DeleteUser(userID)
+	err := h.userService.DeleteUser(userID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -170,7 +170,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 }
 
 func (h *Handler) GetAllUsers(c *gin.Context) {
-	users, err := h.storage.GetAllUsers()
+	users, err := h.userService.GetAllUsers()
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to get users"})
 		return

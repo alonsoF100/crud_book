@@ -81,7 +81,7 @@ func (s *Storage) RunMigrations() error {
 	return nil
 }
 
-func (s *Storage) AddUser(name, email string) (*User, error) {
+func (s *Storage) CreateUser(name, email string) (*User, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO users (id, name, email) 
