@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"crud_book/internal/models"
 	"fmt"
 	"log"
 	"os"
@@ -12,21 +13,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/pressly/goose/v3"
 )
-
-type Book struct {
-	ID          string  `json:"id" db:"id"`
-	UserID      string  `json:"user_id" db:"user_id"`
-	Name        string  `json:"name" db:"name"`
-	Description string  `json:"description" db:"description"`
-	Rating      float64 `json:"rating" db:"rating"`
-	Status      string  `json:"status" db:"status"`
-}
-
-type User struct {
-	ID    string `json:"id" db:"id"`
-	Name  string `json:"name" db:"name"`
-	Email string `json:"email" db:"email"`
-}
 
 type Storage struct {
 	db *pgxpool.Pool
@@ -81,14 +67,14 @@ func (s *Storage) RunMigrations() error {
 	return nil
 }
 
-func (s *Storage) CreateUser(name, email string) (*User, error) {
+func (s *Storage) CreateUser(name, email string) (*models.User, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO users (id, name, email) 
 				   VALUES ($1, $2, $3)
 				   RETURNING id, name, email`
 
-	var user User
+	var user models.User
 	err := s.db.QueryRow(context.Background(), query, newID, name, email).
 		Scan(&user.ID, &user.Name, &user.Email)
 	if err != nil {
@@ -98,11 +84,11 @@ func (s *Storage) CreateUser(name, email string) (*User, error) {
 	return &user, nil
 }
 
-func (s *Storage) GetUser(userID string) (*User, error) {
+func (s *Storage) GetUser(userID string) (*models.User, error) {
 	const query = `SELECT id, name, email
 	               FROM users WHERE id = $1`
 
-	var user User
+	var user models.User
 	err := s.db.QueryRow(context.Background(), query, userID).Scan(&user.ID, &user.Name, &user.Email)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
@@ -115,7 +101,7 @@ func (s *Storage) GetUser(userID string) (*User, error) {
 	return &user, nil
 }
 
-func (s *Storage) GetAllUsers() ([]*User, error) {
+func (s *Storage) GetAllUsers() ([]*models.User, error) {
 	const query = `SELECT id, name, email FROM users`
 
 	rows, err := s.db.Query(context.Background(), query)
@@ -124,9 +110,9 @@ func (s *Storage) GetAllUsers() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	users := []*User{}
+	users := []*models.User{}
 	for rows.Next() {
-		var user User
+		var user models.User
 		err := rows.Scan(&user.ID, &user.Name, &user.Email)
 		if err != nil {
 			return nil, fmt.Errorf("scan user: %w", err)
@@ -157,13 +143,13 @@ func (s *Storage) DeleteUser(userID string) error {
 	return nil
 }
 
-func (s *Storage) CreateBook(userID, name, description string) (*Book, error) {
+func (s *Storage) CreateBook(userID, name, description string) (*models.Book, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO books (id, user_id, name, description)
 	               VALUES ($1, $2, $3, $4)
 				   RETURNING id, user_id, name, description, rating, status`
-	var book Book
+	var book models.Book
 	err := s.db.QueryRow(context.Background(), query, newID, userID, name, description).
 		Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
 	if err != nil {
@@ -223,11 +209,11 @@ func (s *Storage) DeleteBook(bookID string) error {
 	return nil
 }
 
-func (s *Storage) GetBook(bookID string) (*Book, error) {
+func (s *Storage) GetBook(bookID string) (*models.Book, error) {
 	const query = `SELECT id, user_id, name, description, rating, status
 	               FROM books WHERE id = $1`
 
-	var book Book
+	var book models.Book
 	err := s.db.QueryRow(context.Background(), query, bookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
@@ -240,7 +226,7 @@ func (s *Storage) GetBook(bookID string) (*Book, error) {
 	return &book, nil
 }
 
-func (s *Storage) GetUserBooks(userID string) ([]*Book, error) {
+func (s *Storage) GetUserBooks(userID string) ([]*models.Book, error) {
 	const query = `SELECT id, user_id, name, description, rating, status FROM books
 	               WHERE user_id = $1`
 
@@ -250,9 +236,9 @@ func (s *Storage) GetUserBooks(userID string) ([]*Book, error) {
 	}
 	defer rows.Close()
 
-	var userBooks []*Book
+	var userBooks []*models.Book
 	for rows.Next() {
-		var book Book
+		var book models.Book
 		err := rows.Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
 		if err != nil {
 			return nil, fmt.Errorf("scan book: %w", err)
