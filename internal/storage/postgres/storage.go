@@ -157,7 +157,7 @@ func (s *Storage) DeleteUser(userID string) error {
 	return nil
 }
 
-func (s *Storage) AddBook(userID, name, description string) (*Book, error) {
+func (s *Storage) CreateBook(userID, name, description string) (*Book, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO books (id, user_id, name, description)

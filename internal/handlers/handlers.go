@@ -1,17 +1,21 @@
 package handlers
 
 import (
-	"crud_book/internal/storage/postgres"
+	"crud_book/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	storage *postgres.Storage
+	bookService *services.BookService
+	userService *services.UserService
 }
 
-func New(storage *postgres.Storage) *Handler {
-	return &Handler{storage: storage}
+func New(bookService *services.BookService, userService *services.UserService) *Handler {
+	return &Handler{
+		bookService: bookService,
+		userService: userService,
+	}
 }
 
 // Хендлеры для book
@@ -29,7 +33,7 @@ func (h *Handler) CreateBook(c *gin.Context) {
 		return
 	}
 
-	book, err := h.storage.AddBook(req.UserID, req.Name, req.Description)
+	book, err := h.bookService.CreateBook(req.UserID, req.Name, req.Description)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -41,7 +45,7 @@ func (h *Handler) CreateBook(c *gin.Context) {
 func (h *Handler) GetUserBooks(c *gin.Context) {
 	userID := c.Param("id")
 
-	books, err := h.storage.GetUserBooks(userID)
+	books, err := h.bookService.GetUserBooks(userID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -63,17 +67,12 @@ func (h *Handler) UpdateBookStatus(c *gin.Context) {
 		return
 	}
 
-	err := h.storage.UpdateBookStatus(bookID, req.Status)
+	book, err := h.bookService.UpdateBookStatus(bookID, req.Status)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	book, err := h.storage.GetBook(bookID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": "не удалось получить обновленную книгу"})
-		return
-	}
 	c.JSON(200, book)
 }
 
@@ -90,24 +89,19 @@ func (h *Handler) UpdateBookRating(c *gin.Context) {
 		return
 	}
 
-	err := h.storage.UpdateBookRating(bookID, req.Rating)
+	book, err := h.bookService.UpdateBookRating(bookID, req.Rating)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	book, err := h.storage.GetBook(bookID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": "не удалось получить обновленную книгу"})
-		return
-	}
 	c.JSON(200, book)
 }
 
 func (h *Handler) DeleteBook(c *gin.Context) {
 	bookID := c.Param("id")
 
-	err := h.storage.DeleteBook(bookID)
+	err := h.bookService.DeleteBook(bookID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -119,7 +113,7 @@ func (h *Handler) DeleteBook(c *gin.Context) {
 func (h *Handler) GetBook(c *gin.Context) {
 	bookID := c.Param("id")
 
-	book, err := h.storage.GetBook(bookID)
+	book, err := h.bookService.GetBook(bookID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
