@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"crud_book/internal/dto"
 	"crud_book/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -21,12 +22,7 @@ func New(bookService *services.BookService, userService *services.UserService) *
 // Хендлеры для book
 
 func (h *Handler) CreateBook(c *gin.Context) {
-	type CreateBookRequest struct {
-		UserID      string `json:"user_id"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-	}
-	var req CreateBookRequest
+	var req dto.CreateBookRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": "Неверный JSON"})
@@ -39,7 +35,8 @@ func (h *Handler) CreateBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(201, book)
+	response := dto.BookToResponse(book)
+	c.JSON(201, response)
 }
 
 func (h *Handler) GetUserBooks(c *gin.Context) {
@@ -51,14 +48,12 @@ func (h *Handler) GetUserBooks(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, books)
+	response := dto.BooksToResponse(books)
+	c.JSON(200, response)
 }
 
 func (h *Handler) UpdateBookStatus(c *gin.Context) {
-	type UpdateBookStatusRequest struct {
-		Status string `json:"status"`
-	}
-	var req UpdateBookStatusRequest
+	var req dto.UpdateBookStatusRequest
 
 	bookID := c.Param("id")
 
@@ -73,14 +68,12 @@ func (h *Handler) UpdateBookStatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, book)
+	response := dto.BookToResponse(book)
+	c.JSON(200, response)
 }
 
 func (h *Handler) UpdateBookRating(c *gin.Context) {
-	type UpdateBookRatingRequest struct {
-		Rating float64 `json:"rating"`
-	}
-	var req UpdateBookRatingRequest
+	var req dto.UpdateBookRatingRequest
 
 	bookID := c.Param("id")
 
@@ -95,7 +88,8 @@ func (h *Handler) UpdateBookRating(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, book)
+	response := dto.BookToResponse(book)
+	c.JSON(200, response)
 }
 
 func (h *Handler) DeleteBook(c *gin.Context) {
@@ -119,17 +113,14 @@ func (h *Handler) GetBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, book)
+	response := dto.BookToResponse(book)
+	c.JSON(200, response)
 }
 
 // Хендлеры для user
 
 func (h *Handler) CreateUser(c *gin.Context) {
-	type CreateUserRequest struct {
-		Name  string `json:"name"`
-		Email string `json:"email"`
-	}
-	var req CreateUserRequest
+	var req dto.CreateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": "Неверный JSON"})
@@ -142,7 +133,8 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(201, user)
+	response := dto.UserToResponse(user)
+	c.JSON(201, response)
 }
 
 func (h *Handler) GetUser(c *gin.Context) {
@@ -154,7 +146,8 @@ func (h *Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, user)
+	response := dto.UserToResponse(user)
+	c.JSON(200, response)
 }
 
 func (h *Handler) DeleteUser(c *gin.Context) {
@@ -176,5 +169,6 @@ func (h *Handler) GetAllUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, users)
+	response := dto.UsersToResponse(users)
+	c.JSON(200, response)
 }
