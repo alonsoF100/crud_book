@@ -25,7 +25,7 @@ func (h *Handler) CreateBook(c *gin.Context) {
 	var req dto.CreateBookRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) UpdateBookStatus(c *gin.Context) {
 	bookID := c.Param("id")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
@@ -78,7 +78,7 @@ func (h *Handler) UpdateBookRating(c *gin.Context) {
 	bookID := c.Param("id")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
@@ -123,7 +123,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	var req dto.CreateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Неверный JSON"})
+		c.JSON(400, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
