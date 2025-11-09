@@ -1,13 +1,13 @@
 package main
 
 import (
-	"crud_book/handlers"
-	"crud_book/storage"
+	"crud_book/internal/handlers"
+	"crud_book/internal/storage/postgres"
 	"log"
 )
 
 func main() {
-	storage := storage.NewConnect()
+	storage := postgres.NewConnect()
 	defer storage.Close()
 
 	err := storage.RunMigrations()

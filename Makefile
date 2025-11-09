@@ -1,25 +1,25 @@
 include .env
 export
 
-GOOSE = goose -dir migrations postgres "${LOCAL_DATABASE_URL}"
+GOOSE = goose -dir internal/storage/postgres/migrations postgres "${LOCAL_DATABASE_URL}"
 
 # DOCKER COMMANDS
 
 # Start all services in Docker (build + run)
 docker-up:
-	cd deploy/dev && docker-compose up --build
+	cd deployments/dev && docker-compose up --build
 
 # Stop and remove all containers (database data preserved)
 docker-down:
-	cd deploy/dev && docker-compose down
+	cd deployments/dev && docker-compose down
 
 # View logs of all services in real time
 docker-logs:
-	cd deploy/dev && docker-compose logs -f
+	cd deployments/dev && docker-compose logs -f
 
 # Build images only without starting
 docker-build:
-	cd deploy/dev && docker-compose build
+	cd deployments/dev && docker-compose build
 
 # DATABASE MIGRATIONS
 
@@ -43,7 +43,7 @@ migration-create:
 
 # Run application locally (for fast development)
 run:
-	go run main.go
+	go run cmd/api/main.go
 
 # Run all tests in project
 test:
@@ -51,14 +51,14 @@ test:
 
 # Build application binary
 build:
-	go build -o app main.go
+	go build -o app cmd/api/main.go
 
 # CLEANUP
 
 # Full cleanup: remove binary and all Docker containers/volumes
 clean:
 	rm -f app
-	docker-compose -f deploy/dev/docker-compose.yml down -v
+	docker-compose -f deployments/dev/docker-compose.yml down -v
 
 # DATABASE BACKUP
 

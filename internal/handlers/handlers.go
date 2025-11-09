@@ -1,16 +1,16 @@
 package handlers
 
 import (
-	"crud_book/storage"
+	"crud_book/internal/storage/postgres"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	storage *storage.Storage
+	storage *postgres.Storage
 }
 
-func New(storage *storage.Storage) *Handler {
+func New(storage *postgres.Storage) *Handler {
 	return &Handler{storage: storage}
 }
 

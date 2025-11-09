@@ -2,11 +2,11 @@ services:
   app:
     build:
       context: ../..
-      dockerfile: deploy/dev/Dockerfile
+      dockerfile: deployments/dev/Dockerfile deployments/dev
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - ../../.env  
     environment:
       - DATABASE_URL=${DOCKER_DATABASE_URL}
     depends_on:
@@ -17,7 +17,7 @@ services:
   db:
     image: postgres:15
     env_file:
-      - .env
+      - ../../.env  
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

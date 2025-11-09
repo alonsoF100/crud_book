@@ -1,4 +1,4 @@
-package storage
+package postgres
 
 import (
 	"context"
@@ -64,7 +64,7 @@ func (s *Storage) RunMigrations() error {
 	}
 	defer db.Close()
 
-	err = goose.Up(db, "migrations")
+	err = goose.Up(db, "internal/storage/postgres/migrations")
 	if err != nil {
 		return fmt.Errorf("run migrations: %w", err)
 	}
@@ -116,7 +116,7 @@ func (s *Storage) GetAllUsers() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	users := []*User{} 
+	users := []*User{}
 	for rows.Next() {
 		var user User
 		err := rows.Scan(&user.ID, &user.Name, &user.Email)
