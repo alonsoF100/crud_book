@@ -15,7 +15,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 COPY --from=builder /app/main .
-COPY --from=builder /app/internal/storage/postgres/migrations ./migrations
+COPY --from=builder /app/internal/storage/postgres/migrations ./internal/storage/postgres/migrations/
 COPY --from=builder /app/.env .
 
 EXPOSE 8080
