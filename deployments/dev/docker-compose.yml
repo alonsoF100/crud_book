@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ../..
-      dockerfile: deployments/dev/Dockerfile deployments/dev
+      dockerfile: deployments/dev/Dockerfile
     ports:
       - "8080:8080"
     env_file:
