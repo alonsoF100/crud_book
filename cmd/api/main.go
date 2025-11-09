@@ -2,6 +2,7 @@ package main
 
 import (
 	"crud_book/internal/handlers"
+	"crud_book/internal/services"
 	"crud_book/internal/storage/postgres"
 	"log"
 )
@@ -15,7 +16,10 @@ func main() {
 		log.Fatal("Migrations failed:", err)
 	}
 
-	handler := handlers.New(storage)
+	bookService := services.NewBookService(storage)
+	userService := services.NewUserService(storage)
+
+	handler := handlers.New(bookService, userService)
 	router := handlers.SetupRouter(handler)
 
 	router.Run(":8080")
