@@ -5,25 +5,25 @@ import (
 	"crud_book/internal/storage"
 )
 
-type BookService struct {
+type BookServiceImpl struct {
 	repo storage.BookRepository
 }
 
-func NewBookService(repo storage.BookRepository) *BookService {
-	return &BookService{repo: repo}
+func NewBookService(repo storage.BookRepository) *BookServiceImpl {
+	return &BookServiceImpl{repo: repo}
 }
 
-func (s *BookService) CreateBook(userID, name, description string) (*models.Book, error) {
+func (s *BookServiceImpl) CreateBook(userID, name, description string) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
 	return s.repo.CreateBook(userID, name, description)
 }
 
-func (s *BookService) GetUserBooks(userID string) ([]*models.Book, error) {
+func (s *BookServiceImpl) GetUserBooks(userID string) ([]*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
 	return s.repo.GetUserBooks(userID)
 }
 
-func (s *BookService) UpdateBookStatus(bookID, status string) (*models.Book, error) {
+func (s *BookServiceImpl) UpdateBookStatus(bookID, status string) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
 	err := s.repo.UpdateBookStatus(bookID, status)
 	if err != nil {
@@ -32,7 +32,7 @@ func (s *BookService) UpdateBookStatus(bookID, status string) (*models.Book, err
 	return s.repo.GetBook(bookID)
 }
 
-func (s *BookService) UpdateBookRating(bookID string, rating float64) (*models.Book, error) {
+func (s *BookServiceImpl) UpdateBookRating(bookID string, rating float64) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
 	err := s.repo.UpdateBookRating(bookID, rating)
 	if err != nil {
@@ -41,12 +41,12 @@ func (s *BookService) UpdateBookRating(bookID string, rating float64) (*models.B
 	return s.repo.GetBook(bookID)
 }
 
-func (s *BookService) DeleteBook(bookID string) error {
+func (s *BookServiceImpl) DeleteBook(bookID string) error {
 	// TODO Добавить валидацию и бизнес логику
 	return s.repo.DeleteBook(bookID)
 }
 
-func (s *BookService) GetBook(bookID string) (*models.Book, error) {
+func (s *BookServiceImpl) GetBook(bookID string) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
 	return s.repo.GetBook(bookID)
 }

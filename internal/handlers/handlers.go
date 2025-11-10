@@ -8,14 +8,14 @@ import (
 )
 
 type Handler struct {
-	bookService *services.BookService
-	userService *services.UserService
+	booksService services.BookService
+	userService  services.UserService
 }
 
-func New(bookService *services.BookService, userService *services.UserService) *Handler {
+func New(booksService services.BookService, userService services.UserService) *Handler {
 	return &Handler{
-		bookService: bookService,
-		userService: userService,
+		booksService: booksService,
+		userService:  userService,
 	}
 }
 
@@ -29,7 +29,7 @@ func (h *Handler) CreateBook(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.CreateBook(req.UserID, req.Name, req.Description)
+	book, err := h.booksService.CreateBook(req.UserID, req.Name, req.Description)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -42,7 +42,7 @@ func (h *Handler) CreateBook(c *gin.Context) {
 func (h *Handler) GetUserBooks(c *gin.Context) {
 	userID := c.Param("id")
 
-	books, err := h.bookService.GetUserBooks(userID)
+	books, err := h.booksService.GetUserBooks(userID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -62,7 +62,7 @@ func (h *Handler) UpdateBookStatus(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.UpdateBookStatus(bookID, req.Status)
+	book, err := h.booksService.UpdateBookStatus(bookID, req.Status)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -82,7 +82,7 @@ func (h *Handler) UpdateBookRating(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.UpdateBookRating(bookID, req.Rating)
+	book, err := h.booksService.UpdateBookRating(bookID, req.Rating)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -95,7 +95,7 @@ func (h *Handler) UpdateBookRating(c *gin.Context) {
 func (h *Handler) DeleteBook(c *gin.Context) {
 	bookID := c.Param("id")
 
-	err := h.bookService.DeleteBook(bookID)
+	err := h.booksService.DeleteBook(bookID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -107,7 +107,7 @@ func (h *Handler) DeleteBook(c *gin.Context) {
 func (h *Handler) GetBook(c *gin.Context) {
 	bookID := c.Param("id")
 
-	book, err := h.bookService.GetBook(bookID)
+	book, err := h.booksService.GetBook(bookID)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
