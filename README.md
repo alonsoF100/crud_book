@@ -1,10 +1,10 @@
-# 📘 Reading Diary
+# Reading Diary
 
 **REST API для ведения дневника прочитанных книг на Go.**
 
 ---
 
-## 🧱 Структура проекта
+## Структура проекта
 
 ```
 ├── cmd
@@ -55,7 +55,7 @@
 
 ---
 
-## 📂 Описание основных директорий и файлов
+## Описание основных директорий и файлов
 
 ### Корень проекта
 
@@ -115,7 +115,7 @@
 
 ---
 
-## 🔁 Поток данных внутри приложения
+## Поток данных внутри приложения
 
 ```
 HTTP Request 
@@ -132,9 +132,9 @@ HTTP Request
 
 ---
 
-## 🚀 Быстрый старт
+## Быстрый старт
 
-1️⃣ Создай файл `.env` в корне проекта:
+1) Создай файл `.env` в корне проекта:
 
 ```env
 POSTGRES_USER=postgres
@@ -145,7 +145,7 @@ LOCAL_DATABASE_URL=postgres://postgres:postgres@localhost:5432/library?sslmode=d
 DOCKER_DATABASE_URL=postgres://postgres:postgres@db:5432/library?sslmode=disable
 ```
 
-2️⃣ Подними контейнеры:
+2) Подними контейнеры:
 
 ```bash
 make docker-up
@@ -153,7 +153,7 @@ make docker-up
 
 ---
 
-## 🧰 Используемые технологии
+## Используемые технологии
 
 * **Go + Gin** — бэкенд и HTTP-фреймворк
 * **PostgreSQL + pgx/v5** — база данных и драйвер
@@ -162,9 +162,9 @@ make docker-up
 
 ---
 
-## 📚 API Endpoints
+## API Endpoints
 
-### 📖 Книги
+### Книги
 
 #### POST `/books` — Создать книгу
 
@@ -206,7 +206,7 @@ make docker-up
 
 ---
 
-### 👤 Пользователи
+### Пользователи
 
 #### POST `/users` — Создать пользователя
 
@@ -227,7 +227,7 @@ make docker-up
 
 ---
 
-## 🧩 Модели данных
+## Модели данных
 
 ### Пользователь (User)
 
@@ -254,7 +254,7 @@ make docker-up
 
 ---
 
-## 🧪 API Testing
+## API Testing
 
 * **`crud_book_api.postman_collection.json`** — коллекция API эндпоинтов
 * **`Local Development.postman_environment.json`** — переменные окружения
@@ -263,7 +263,7 @@ make docker-up
 
 ---
 
-## ⭐ Поддержка
+## Поддержка
 
 Если проект был полезен — **поставь звёздочку ⭐ на GitHub!**
 
