@@ -8,13 +8,14 @@ import (
 )
 
 func main() {
-	storage := postgres.NewConnect()
-	defer storage.Close()
-
-	err := storage.RunMigrations()
+	migrator := postgres.NewMigrator("internal/storage/postgres/migrations")
+	err := migrator.RunMigrations()
 	if err != nil {
 		log.Fatal("Migrations failed:", err)
 	}
+
+	storage := postgres.NewConnect()
+	defer storage.Close()
 
 	bookStorage := postgres.NewBookStorage(storage.DB())
 	userStorage := postgres.NewUserStorage(storage.DB())
