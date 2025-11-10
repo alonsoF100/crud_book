@@ -16,8 +16,11 @@ func main() {
 		log.Fatal("Migrations failed:", err)
 	}
 
-	bookService := services.NewBookService(storage)
-	userService := services.NewUserService(storage)
+	bookStorage := postgres.NewBookStorage(storage.DB())
+	userStorage := postgres.NewUserStorage(storage.DB())
+
+	bookService := services.NewBookService(bookStorage)
+	userService := services.NewUserService(userStorage)
 
 	handler := handlers.New(bookService, userService)
 	router := handlers.SetupRouter(handler)

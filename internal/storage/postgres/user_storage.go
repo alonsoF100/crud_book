@@ -1,0 +1,94 @@
+package postgres
+
+import (
+	"context"
+	"crud_book/internal/models"
+	"fmt"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type UserStorage struct {
+	db *pgxpool.Pool
+}
+
+func NewUserStorage(db *pgxpool.Pool) *UserStorage {
+	return &UserStorage{db: db}
+}
+
+func (s *UserStorage) CreateUser(name, email string) (*models.User, error) {
+	newID := uuid.New().String()
+
+	const query = `INSERT INTO users (id, name, email) 
+				   VALUES ($1, $2, $3)
+				   RETURNING id, name, email`
+
+	var user models.User
+	err := s.db.QueryRow(context.Background(), query, newID, name, email).
+		Scan(&user.ID, &user.Name, &user.Email)
+	if err != nil {
+		return nil, fmt.Errorf("create user: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (s *UserStorage) GetUser(userID string) (*models.User, error) {
+	const query = `SELECT id, name, email
+	               FROM users WHERE id = $1`
+
+	var user models.User
+	err := s.db.QueryRow(context.Background(), query, userID).Scan(&user.ID, &user.Name, &user.Email)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return nil, fmt.Errorf("failed to find user with ID: %s", userID)
+		}
+
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (s *UserStorage) GetAllUsers() ([]*models.User, error) {
+	const query = `SELECT id, name, email FROM users`
+
+	rows, err := s.db.Query(context.Background(), query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all users: %w", err)
+	}
+	defer rows.Close()
+
+	users := []*models.User{}
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Name, &user.Email)
+		if err != nil {
+			return nil, fmt.Errorf("scan user: %w", err)
+		}
+
+		users = append(users, &user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+
+	return users, nil
+}
+
+func (s *UserStorage) DeleteUser(userID string) error {
+	const query = `DELETE FROM users WHERE id = $1`
+
+	result, err := s.db.Exec(context.Background(), query, userID)
+	if err != nil {
+		return fmt.Errorf("delete user: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("failed find user with ID: %s", userID)
+	}
+
+	return nil
+}

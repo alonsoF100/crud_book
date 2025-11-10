@@ -2,33 +2,33 @@ package services
 
 import (
 	"crud_book/internal/models"
-	"crud_book/internal/storage/postgres"
+	"crud_book/internal/storage"
 )
 
 type UserService struct {
-	storage *postgres.Storage
+	repo storage.UserRepository
 }
 
-func NewUserService(storage *postgres.Storage) *UserService {
-	return &UserService{storage: storage}
+func NewUserService(repo storage.UserRepository) *UserService {
+	return &UserService{repo: repo}
 }
 
 func (s *UserService) CreateUser(name, email string) (*models.User, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.storage.CreateUser(name, email)
+	return s.repo.CreateUser(name, email)
 }
 
 func (s *UserService) GetUser(userID string) (*models.User, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.storage.GetUser(userID)
+	return s.repo.GetUser(userID)
 }
 
 func (s *UserService) DeleteUser(userID string) error {
 	// TODO Добавить валидацию и бизнес логику
-	return s.storage.DeleteUser(userID)
+	return s.repo.DeleteUser(userID)
 }
 
 func (s *UserService) GetAllUsers() ([]*models.User, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.storage.GetAllUsers()
+	return s.repo.GetAllUsers()
 }
