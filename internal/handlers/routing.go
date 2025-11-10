@@ -6,8 +6,8 @@ import (
 
 func SetupRouter(h *Handler) *gin.Engine {
 	r := gin.Default()
-	// Енд поинты для book
 
+	// End-points for book
 	r.POST("/books", h.CreateBook)
 	r.GET("/books/:id", h.GetBook)
 	r.PUT("/books/:id/status", h.UpdateBookStatus)
@@ -15,8 +15,7 @@ func SetupRouter(h *Handler) *gin.Engine {
 	r.DELETE("/books/:id", h.DeleteBook)
 	r.GET("/users/:id/books", h.GetUserBooks)
 
-	// Енд поинты для user
-
+	// End-points for user
 	r.POST("/users", h.CreateUser)
 	r.GET("/users", h.GetAllUsers)
 	r.GET("/users/:id", h.GetUser)

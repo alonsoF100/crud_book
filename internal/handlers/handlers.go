@@ -19,7 +19,7 @@ func New(bookService *services.BookService, userService *services.UserService) *
 	}
 }
 
-// Хендлеры для book
+// Book handlers
 
 func (h *Handler) CreateBook(c *gin.Context) {
 	var req dto.CreateBookRequest
@@ -117,7 +117,7 @@ func (h *Handler) GetBook(c *gin.Context) {
 	c.JSON(200, response)
 }
 
-// Хендлеры для user
+// User handlers
 
 func (h *Handler) CreateUser(c *gin.Context) {
 	var req dto.CreateUserRequest
