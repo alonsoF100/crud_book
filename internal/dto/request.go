@@ -8,7 +8,7 @@ type CreateBookRequest struct {
 }
 
 type UpdateBookStatusRequest struct {
-	Status string `json:"status" binding:"required,oneof=reading finished planned"`
+	Status string `json:"status" binding:"required,oneof=want reading finished"`
 }
 
 type UpdateBookRatingRequest struct {
