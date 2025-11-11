@@ -107,6 +107,7 @@
 ### `docs/postman/`
 
 * **crud_book_api.postman_collection.json** — коллекция API для тестирования
+* **crud_book_api.postman_collection.json** — новая коллекция API эндпоинтов с тестом query билдера
 * **Local Development.postman_environment.json** — переменные окружения
 
 ### `internal/storage/redis/`
@@ -204,6 +205,40 @@ make docker-up
 
 #### GET `/users/:id/books` — Получить книги пользователя
 
+**Query parameters:**
+
+| Параметр   | Тип      | Обязательный | Описание                        | Допустимые значения             | По умолчанию  |
+|-------------|-----------|---------------|----------------------------------|----------------------------------|----------------|
+| `limit`     | integer   | нет           | Количество книг на странице      | 1–50                            | 20             |
+| `offset`    | integer   | нет           | Смещение для пагинации           | ≥ 0                             | 0              |
+| `sort`      | string    | нет           | Поле для сортировки              | created_at, name, rating, status | created_at     |
+| `order`     | string    | нет           | Порядок сортировки               | asc, desc                       | desc           |
+| `status`    | string    | нет           | Фильтр по статусу прочтения      | want, reading, finished          | —              |
+| `min_rating`| float     | нет           | Минимальный рейтинг (включительно) | 0.0–5.0                        | —              |
+| `max_rating`| float     | нет           | Максимальный рейтинг (включительно) | 0.0–5.0                        | —              |
+
+**Примеры запросов:**
+
+```bash
+# Все книги пользователя (с пагинацией)
+GET /users/123/books?limit=10&offset=0
+
+# Только читаемые книги
+GET /users/123/books?status=reading
+
+# Книги с рейтингом 4+ звезды
+GET /users/123/books?min_rating=4
+
+# Книги с рейтингом от 3 до 5 звезд
+GET /users/123/books?min_rating=3&max_rating=5
+
+# Сортировка по рейтингу (по убыванию)
+GET /users/123/books?sort=rating&order=desc
+
+# Комбинированные фильтры
+GET /users/123/books?status=finished&min_rating=4&sort=rating&order=desc
+```
+
 ---
 
 ### Пользователи
@@ -248,7 +283,8 @@ make docker-up
   "name": "string",
   "description": "string",
   "rating": 4.5,
-  "status": "want|reading|finished"
+  "status": "want|reading|finished",
+  "created_at": "TIMESTAMP"
 }
 ```
 
@@ -257,6 +293,7 @@ make docker-up
 ## API Testing
 
 * **`crud_book_api.postman_collection.json`** — коллекция API эндпоинтов
+* **`crud_book_api.postman_collection.json`** — новая коллекция API эндпоинтов с тестом query билдера
 * **`Local Development.postman_environment.json`** — переменные окружения
 
 Импортируй их в Postman для локального тестирования.

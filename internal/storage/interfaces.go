@@ -1,10 +1,13 @@
 package storage
 
-import "crud_book/internal/models"
+import (
+	"crud_book/internal/dto"
+	"crud_book/internal/models"
+)
 
 type BookRepository interface {
 	CreateBook(userID, name, description string) (*models.Book, error)
-	GetUserBooks(userID string) ([]*models.Book, error)
+	GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error)
 	UpdateBookStatus(bookID, status string) error
 	UpdateBookRating(bookID string, rating float64) error
 	GetBook(bookID string) (*models.Book, error)

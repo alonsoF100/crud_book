@@ -10,6 +10,7 @@ func BookToResponse(book *models.Book) BookResponse {
 		Description: book.Description,
 		Rating:      book.Rating,
 		Status:      book.Status,
+		CreatedAt:   book.CreatedAt,
 	}
 }
 

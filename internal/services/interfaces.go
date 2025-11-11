@@ -1,6 +1,9 @@
 package services
 
-import "crud_book/internal/models"
+import (
+	"crud_book/internal/dto"
+	"crud_book/internal/models"
+)
 
 type UserService interface {
 	CreateUser(name, email string) (*models.User, error)
@@ -11,7 +14,7 @@ type UserService interface {
 
 type BookService interface {
 	CreateBook(userID, name, description string) (*models.Book, error)
-	GetUserBooks(userID string) ([]*models.Book, error)
+	GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error)
 	UpdateBookStatus(bookID, status string) (*models.Book, error)
 	UpdateBookRating(bookID string, rating float64) (*models.Book, error)
 	DeleteBook(bookID string) error

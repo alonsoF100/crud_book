@@ -40,9 +40,17 @@ func (h *Handler) CreateBook(c *gin.Context) {
 }
 
 func (h *Handler) GetUserBooks(c *gin.Context) {
-	userID := c.Param("id")
+	var req dto.GetUserBooksRequest
 
-	books, err := h.booksService.GetUserBooks(userID)
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+	req.SetDefaults()
+
+	books, err := h.booksService.GetUserBooks(req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return

@@ -2,9 +2,11 @@ package postgres
 
 import (
 	"context"
+	"crud_book/internal/dto"
 	"crud_book/internal/models"
 	"fmt"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -22,10 +24,10 @@ func (s *BookStorage) CreateBook(userID, name, description string) (*models.Book
 
 	const query = `INSERT INTO books (id, user_id, name, description)
 	               VALUES ($1, $2, $3, $4)
-				   RETURNING id, user_id, name, description, rating, status`
+				   RETURNING id, user_id, name, description, rating, status, created_at`
 	var book models.Book
 	err := s.db.QueryRow(context.Background(), query, newID, userID, name, description).
-		Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
+		Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("create book: %w", err)
 	}
@@ -84,11 +86,11 @@ func (s *BookStorage) DeleteBook(bookID string) error {
 }
 
 func (s *BookStorage) GetBook(bookID string) (*models.Book, error) {
-	const query = `SELECT id, user_id, name, description, rating, status
+	const query = `SELECT id, user_id, name, description, rating, status, created_at
 	               FROM books WHERE id = $1`
 
 	var book models.Book
-	err := s.db.QueryRow(context.Background(), query, bookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
+	err := s.db.QueryRow(context.Background(), query, bookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			return nil, fmt.Errorf("failed to find book with ID: %s", bookID)
@@ -100,11 +102,36 @@ func (s *BookStorage) GetBook(bookID string) (*models.Book, error) {
 	return &book, nil
 }
 
-func (s *BookStorage) GetUserBooks(userID string) ([]*models.Book, error) {
-	const query = `SELECT id, user_id, name, description, rating, status FROM books
-	               WHERE user_id = $1`
+func (s *BookStorage) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error) {
+	qb := squirrel.
+		Select("id", "user_id", "name", "description", "rating", "status", "created_at").
+		From("books").
+		Where(squirrel.Eq{"user_id": req.UserID})
 
-	rows, err := s.db.Query(context.Background(), query, userID)
+	if req.Status != "" {
+		qb = qb.Where(squirrel.Eq{"status": req.Status})
+	}
+
+	if req.MinRating != 0 || req.MaxRating != 0 {
+		if req.MinRating != 0 {
+			qb = qb.Where(squirrel.GtOrEq{"rating": req.MinRating})
+		}
+		if req.MaxRating != 0 {
+			qb = qb.Where(squirrel.LtOrEq{"rating": req.MaxRating})
+		}
+	}
+
+	query, args, err := qb.OrderBy(req.Sort + " " + req.Order).
+		Limit(uint64(req.Limit)).
+		Offset(uint64(req.Offset)).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, fmt.Errorf("build query: %w", err)
+	}
+
+	rows, err := s.db.Query(context.Background(), query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get users books: %w", err)
 	}
@@ -113,7 +140,7 @@ func (s *BookStorage) GetUserBooks(userID string) ([]*models.Book, error) {
 	var userBooks []*models.Book
 	for rows.Next() {
 		var book models.Book
-		err := rows.Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status)
+		err := rows.Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("scan book: %w", err)
 		}

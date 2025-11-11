@@ -1,6 +1,7 @@
 package services
 
 import (
+	"crud_book/internal/dto"
 	"crud_book/internal/models"
 	"crud_book/internal/storage"
 )
@@ -18,9 +19,9 @@ func (s *BookServiceImpl) CreateBook(userID, name, description string) (*models.
 	return s.repo.CreateBook(userID, name, description)
 }
 
-func (s *BookServiceImpl) GetUserBooks(userID string) ([]*models.Book, error) {
+func (s *BookServiceImpl) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.GetUserBooks(userID)
+	return s.repo.GetUserBooks(req)
 }
 
 func (s *BookServiceImpl) UpdateBookStatus(bookID, status string) (*models.Book, error) {
