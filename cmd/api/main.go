@@ -23,8 +23,7 @@ func main() {
 	bookService := services.NewBookService(bookStorage)
 	userService := services.NewUserService(userStorage)
 
-	handlers := handlers.NewHandlers(bookService, userService)
-	router := handlers.SetupRouter()
+	router := handlers.NewRouter(bookService, userService)
 
 	router.Run(":8080")
 }
