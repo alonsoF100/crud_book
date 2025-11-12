@@ -17,8 +17,8 @@ func main() {
 	storage := postgres.NewConnect()
 	defer storage.Close()
 
-	bookStorage := postgres.NewBookStorage(storage.DB())
-	userStorage := postgres.NewUserStorage(storage.DB())
+	bookStorage := postgres.NewBookStorage(storage.GetPool())
+	userStorage := postgres.NewUserStorage(storage.GetPool())
 
 	bookService := services.NewBookService(bookStorage)
 	userService := services.NewUserService(userStorage)

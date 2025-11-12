@@ -37,7 +37,7 @@ func NewConnect() *storage {
 	return &storage{db: db}
 }
 
-func (s *storage) DB() *pgxpool.Pool {
+func (s *storage) GetPool() *pgxpool.Pool {
 	return s.db
 }
 

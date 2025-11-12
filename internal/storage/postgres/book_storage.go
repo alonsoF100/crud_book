@@ -25,6 +25,7 @@ func (s *bookStorage) CreateBook(userID, name, description string) (*models.Book
 	const query = `INSERT INTO books (id, user_id, name, description)
 	               VALUES ($1, $2, $3, $4)
 				   RETURNING id, user_id, name, description, rating, status, created_at`
+				   
 	var book models.Book
 	err := s.db.QueryRow(context.Background(), query, newID, userID, name, description).
 		Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
