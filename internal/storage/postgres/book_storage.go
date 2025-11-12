@@ -11,15 +11,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type BookStorage struct {
+type bookStorage struct {
 	db *pgxpool.Pool
 }
 
-func NewBookStorage(db *pgxpool.Pool) *BookStorage {
-	return &BookStorage{db: db}
+func NewBookStorage(db *pgxpool.Pool) *bookStorage {
+	return &bookStorage{db: db}
 }
 
-func (s *BookStorage) CreateBook(userID, name, description string) (*models.Book, error) {
+func (s *bookStorage) CreateBook(userID, name, description string) (*models.Book, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO books (id, user_id, name, description)
@@ -35,7 +35,7 @@ func (s *BookStorage) CreateBook(userID, name, description string) (*models.Book
 	return &book, nil
 }
 
-func (s *BookStorage) UpdateBookStatus(bookID, status string) error {
+func (s *bookStorage) UpdateBookStatus(bookID, status string) error {
 	const query = `UPDATE books
 	               SET status = $1
 	               WHERE id = $2`
@@ -52,7 +52,7 @@ func (s *BookStorage) UpdateBookStatus(bookID, status string) error {
 	return nil
 }
 
-func (s *BookStorage) UpdateBookRating(bookID string, rating float64) error {
+func (s *bookStorage) UpdateBookRating(bookID string, rating float64) error {
 	const query = `UPDATE books
 	               SET rating = $1
 				   WHERE id = $2`
@@ -69,7 +69,7 @@ func (s *BookStorage) UpdateBookRating(bookID string, rating float64) error {
 	return nil
 }
 
-func (s *BookStorage) DeleteBook(bookID string) error {
+func (s *bookStorage) DeleteBook(bookID string) error {
 	const query = `DELETE FROM books
 	               WHERE id = $1`
 
@@ -85,7 +85,7 @@ func (s *BookStorage) DeleteBook(bookID string) error {
 	return nil
 }
 
-func (s *BookStorage) GetBook(bookID string) (*models.Book, error) {
+func (s *bookStorage) GetBook(bookID string) (*models.Book, error) {
 	const query = `SELECT id, user_id, name, description, rating, status, created_at
 	               FROM books WHERE id = $1`
 
@@ -102,7 +102,7 @@ func (s *BookStorage) GetBook(bookID string) (*models.Book, error) {
 	return &book, nil
 }
 
-func (s *BookStorage) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error) {
+func (s *bookStorage) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error) {
 	qb := squirrel.
 		Select("id", "user_id", "name", "description", "rating", "status", "created_at").
 		From("books").

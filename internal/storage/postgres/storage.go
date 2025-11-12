@@ -10,11 +10,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Storage struct {
+type storage struct {
 	db *pgxpool.Pool
 }
 
-func NewConnect() *Storage {
+func NewConnect() *storage {
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println(".env file not found")
@@ -34,13 +34,13 @@ func NewConnect() *Storage {
 		log.Fatalf("failed ping %v", err)
 	}
 
-	return &Storage{db: db}
+	return &storage{db: db}
 }
 
-func (s *Storage) DB() *pgxpool.Pool {
+func (s *storage) DB() *pgxpool.Pool {
 	return s.db
 }
 
-func (s *Storage) Close() {
+func (s *storage) Close() {
 	s.db.Close()
 }

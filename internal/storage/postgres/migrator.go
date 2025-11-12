@@ -10,15 +10,15 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-type Migrator struct {
+type migrator struct {
 	migrationPath string
 }
 
-func NewMigrator(migrationPath string) *Migrator {
-	return &Migrator{migrationPath: migrationPath}
+func NewMigrator(migrationPath string) *migrator {
+	return &migrator{migrationPath: migrationPath}
 }
 
-func (m *Migrator) RunMigrations() error {
+func (m *migrator) RunMigrations() error {
 	godotenv.Load()
 
 	databaseURL := os.Getenv("DATABASE_URL")

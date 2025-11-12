@@ -26,12 +26,6 @@ type GetUserBooksRequest struct {
 	MaxRating float64 `form:"max_rating" binding:"omitempty,min=0,max=5"`
 }
 
-// User Requests
-type CreateUserRequest struct {
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required,email"`
-}
-
 func (r *GetUserBooksRequest) SetDefaults() {
 	if r.Limit == 0 {
 		r.Limit = 20
@@ -42,4 +36,10 @@ func (r *GetUserBooksRequest) SetDefaults() {
 	if r.Order == "" {
 		r.Order = "desc"
 	}
+}
+
+// User Requests
+type CreateUserRequest struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email" binding:"required,email"`
 }

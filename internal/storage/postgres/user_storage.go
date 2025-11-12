@@ -9,15 +9,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserStorage struct {
+type userStorage struct {
 	db *pgxpool.Pool
 }
 
-func NewUserStorage(db *pgxpool.Pool) *UserStorage {
-	return &UserStorage{db: db}
+func NewUserStorage(db *pgxpool.Pool) *userStorage {
+	return &userStorage{db: db}
 }
 
-func (s *UserStorage) CreateUser(name, email string) (*models.User, error) {
+func (s *userStorage) CreateUser(name, email string) (*models.User, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO users (id, name, email) 
@@ -34,7 +34,7 @@ func (s *UserStorage) CreateUser(name, email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (s *UserStorage) GetUser(userID string) (*models.User, error) {
+func (s *userStorage) GetUser(userID string) (*models.User, error) {
 	const query = `SELECT id, name, email
 	               FROM users WHERE id = $1`
 
@@ -51,7 +51,7 @@ func (s *UserStorage) GetUser(userID string) (*models.User, error) {
 	return &user, nil
 }
 
-func (s *UserStorage) GetAllUsers() ([]*models.User, error) {
+func (s *userStorage) GetAllUsers() ([]*models.User, error) {
 	const query = `SELECT id, name, email FROM users`
 
 	rows, err := s.db.Query(context.Background(), query)
@@ -78,7 +78,7 @@ func (s *UserStorage) GetAllUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func (s *UserStorage) DeleteUser(userID string) error {
+func (s *userStorage) DeleteUser(userID string) error {
 	const query = `DELETE FROM users WHERE id = $1`
 
 	result, err := s.db.Exec(context.Background(), query, userID)
