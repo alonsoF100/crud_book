@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"crud_book/internal/dto"
 	"crud_book/internal/services"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +25,10 @@ func (h *bookHandler) createBook(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.CreateBook(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	book, err := h.bookService.CreateBook(ctx, req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -46,7 +51,10 @@ func (h *bookHandler) getUserBooks(c *gin.Context) {
 	}
 	req.SetDefaults()
 
-	books, err := h.bookService.GetUserBooks(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	books, err := h.bookService.GetUserBooks(ctx, req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -69,7 +77,10 @@ func (h *bookHandler) updateBookStatus(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.UpdateBookStatus(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	book, err := h.bookService.UpdateBookStatus(ctx, req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -92,7 +103,10 @@ func (h *bookHandler) updateBookRating(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.UpdateBookRating(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	book, err := h.bookService.UpdateBookRating(ctx, req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -110,7 +124,10 @@ func (h *bookHandler) deleteBook(c *gin.Context) {
 		return
 	}
 
-	err := h.bookService.DeleteBook(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	err := h.bookService.DeleteBook(ctx, req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -127,7 +144,10 @@ func (h *bookHandler) getBook(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.GetBook(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	book, err := h.bookService.GetBook(ctx, req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return

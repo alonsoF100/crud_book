@@ -19,7 +19,7 @@ func NewBookStorage(db *pgxpool.Pool) *bookStorage {
 	return &bookStorage{db: db}
 }
 
-func (s *bookStorage) CreateBook(req dto.CreateBookRequest) (*models.Book, error) {
+func (s *bookStorage) CreateBook(ctx context.Context, req dto.CreateBookRequest) (*models.Book, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO books (id, user_id, name, description)
@@ -27,7 +27,7 @@ func (s *bookStorage) CreateBook(req dto.CreateBookRequest) (*models.Book, error
 				   RETURNING id, user_id, name, description, rating, status, created_at`
 				   
 	var book models.Book
-	err := s.db.QueryRow(context.Background(), query, newID, req.UserID, req.Name, req.Description).
+	err := s.db.QueryRow(ctx, query, newID, req.UserID, req.Name, req.Description).
 		Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("create book: %w", err)
@@ -36,12 +36,12 @@ func (s *bookStorage) CreateBook(req dto.CreateBookRequest) (*models.Book, error
 	return &book, nil
 }
 
-func (s *bookStorage) UpdateBookStatus(req dto.UpdateBookStatusRequest) error {
+func (s *bookStorage) UpdateBookStatus(ctx context.Context, req dto.UpdateBookStatusRequest) error {
 	const query = `UPDATE books
 	               SET status = $1
 	               WHERE id = $2`
 
-	result, err := s.db.Exec(context.Background(), query, req.Status, req.BookID)
+	result, err := s.db.Exec(ctx, query, req.Status, req.BookID)
 	if err != nil {
 		return fmt.Errorf("update book status: %w", err)
 	}
@@ -53,12 +53,12 @@ func (s *bookStorage) UpdateBookStatus(req dto.UpdateBookStatusRequest) error {
 	return nil
 }
 
-func (s *bookStorage) UpdateBookRating(req dto.UpdateBookRatingRequest) error {
+func (s *bookStorage) UpdateBookRating(ctx context.Context, req dto.UpdateBookRatingRequest) error {
 	const query = `UPDATE books
 	               SET rating = $1
 				   WHERE id = $2`
 
-	result, err := s.db.Exec(context.Background(), query, req.Rating, req.BookID)
+	result, err := s.db.Exec(ctx, query, req.Rating, req.BookID)
 	if err != nil {
 		return fmt.Errorf("update book rating: %w", err)
 	}
@@ -70,11 +70,11 @@ func (s *bookStorage) UpdateBookRating(req dto.UpdateBookRatingRequest) error {
 	return nil
 }
 
-func (s *bookStorage) DeleteBook(req dto.DeleteBookRequest) error {
+func (s *bookStorage) DeleteBook(ctx context.Context, req dto.DeleteBookRequest) error {
 	const query = `DELETE FROM books
 	               WHERE id = $1`
 
-	result, err := s.db.Exec(context.Background(), query, req.BookID)
+	result, err := s.db.Exec(ctx, query, req.BookID)
 	if err != nil {
 		return fmt.Errorf("delete book: %w", err)
 	}
@@ -86,12 +86,12 @@ func (s *bookStorage) DeleteBook(req dto.DeleteBookRequest) error {
 	return nil
 }
 
-func (s *bookStorage) GetBook(req dto.GetBookRequest) (*models.Book, error) {
+func (s *bookStorage) GetBook(ctx context.Context, req dto.GetBookRequest) (*models.Book, error) {
 	const query = `SELECT id, user_id, name, description, rating, status, created_at
 	               FROM books WHERE id = $1`
 
 	var book models.Book
-	err := s.db.QueryRow(context.Background(), query, req.BookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
+	err := s.db.QueryRow(ctx, query, req.BookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			return nil, fmt.Errorf("failed to find book with ID: %s", req.BookID)
@@ -103,7 +103,7 @@ func (s *bookStorage) GetBook(req dto.GetBookRequest) (*models.Book, error) {
 	return &book, nil
 }
 
-func (s *bookStorage) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error) {
+func (s *bookStorage) GetUserBooks(ctx context.Context, req dto.GetUserBooksRequest) ([]*models.Book, error) {
 	qb := squirrel.
 		Select("id", "user_id", "name", "description", "rating", "status", "created_at").
 		From("books").
@@ -132,7 +132,7 @@ func (s *bookStorage) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book,
 		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := s.db.Query(context.Background(), query, args...)
+	rows, err := s.db.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get users books: %w", err)
 	}

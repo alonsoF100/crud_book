@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"crud_book/internal/dto"
 	"crud_book/internal/services"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +25,10 @@ func (h *userHandler) createUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.CreateUser(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	user, err := h.userService.CreateUser(ctx, req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -40,7 +45,10 @@ func (h *userHandler) getUser(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 	}
 
-	user, err := h.userService.GetUser(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	user, err := h.userService.GetUser(ctx, req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -57,7 +65,10 @@ func (h *userHandler) deleteUser(c *gin.Context) {
 		c.JSON(400, gin.H{"error": err.Error()})
 	}
 
-	err := h.userService.DeleteUser(req)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	err := h.userService.DeleteUser(ctx, req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -67,7 +78,10 @@ func (h *userHandler) deleteUser(c *gin.Context) {
 }
 
 func (h *userHandler) getAllUsers(c *gin.Context) {
-	users, err := h.userService.GetAllUsers()
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	users, err := h.userService.GetAllUsers(ctx)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to get users"})
 		return

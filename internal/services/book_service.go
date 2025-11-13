@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"crud_book/internal/dto"
 	"crud_book/internal/models"
 	"crud_book/internal/storage"
@@ -14,41 +15,41 @@ func NewBookService(repo storage.BookRepository) *bookServiceImpl {
 	return &bookServiceImpl{repo: repo}
 }
 
-func (s *bookServiceImpl) CreateBook(req dto.CreateBookRequest) (*models.Book, error) {
+func (s *bookServiceImpl) CreateBook(ctx context.Context, req dto.CreateBookRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.CreateBook(req)
+	return s.repo.CreateBook(ctx, req)
 }
 
-func (s *bookServiceImpl) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error) {
+func (s *bookServiceImpl) GetUserBooks(ctx context.Context, req dto.GetUserBooksRequest) ([]*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.GetUserBooks(req)
+	return s.repo.GetUserBooks(ctx, req)
 }
 
-func (s *bookServiceImpl) UpdateBookStatus(req dto.UpdateBookStatusRequest) (*models.Book, error) {
+func (s *bookServiceImpl) UpdateBookStatus(ctx context.Context, req dto.UpdateBookStatusRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	err := s.repo.UpdateBookStatus(req)
+	err := s.repo.UpdateBookStatus(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	
-	return s.repo.GetBook(dto.NewGetBookRequest(req.BookID))
+
+	return s.repo.GetBook(ctx, dto.NewGetBookRequest(req.BookID))
 }
 
-func (s *bookServiceImpl) UpdateBookRating(req dto.UpdateBookRatingRequest) (*models.Book, error) {
+func (s *bookServiceImpl) UpdateBookRating(ctx context.Context, req dto.UpdateBookRatingRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	err := s.repo.UpdateBookRating(req)
+	err := s.repo.UpdateBookRating(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return s.repo.GetBook(dto.NewGetBookRequest(req.BookID))
+	return s.repo.GetBook(ctx, dto.NewGetBookRequest(req.BookID))
 }
 
-func (s *bookServiceImpl) DeleteBook(req dto.DeleteBookRequest) error {
+func (s *bookServiceImpl) DeleteBook(ctx context.Context, req dto.DeleteBookRequest) error {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.DeleteBook(req)
+	return s.repo.DeleteBook(ctx, req)
 }
 
-func (s *bookServiceImpl) GetBook(req dto.GetBookRequest) (*models.Book, error) {
+func (s *bookServiceImpl) GetBook(ctx context.Context, req dto.GetBookRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.GetBook(req)
+	return s.repo.GetBook(ctx, req)
 }
