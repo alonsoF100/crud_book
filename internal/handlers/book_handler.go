@@ -59,13 +59,11 @@ func (h *bookHandler) getUserBooks(c *gin.Context) {
 func (h *bookHandler) updateBookStatus(c *gin.Context) {
 	var req dto.UpdateBookStatusRequest
 
-	// 1. Сначала биндим URI (BookID)
 	if err := c.ShouldBindUri(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 2. Биндим JSON (Status)
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -84,13 +82,11 @@ func (h *bookHandler) updateBookStatus(c *gin.Context) {
 func (h *bookHandler) updateBookRating(c *gin.Context) {
 	var req dto.UpdateBookRatingRequest
 
-	// 1. Сначала биндим URI (BookID)
 	if err := c.ShouldBindUri(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 2. Биндим JSON (Status)
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
