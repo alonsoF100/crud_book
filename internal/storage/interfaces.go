@@ -6,17 +6,17 @@ import (
 )
 
 type BookRepository interface {
-	CreateBook(userID, name, description string) (*models.Book, error)
+	CreateBook(req dto.CreateBookRequest) (*models.Book, error)
 	GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error)
-	UpdateBookStatus(bookID, status string) error
-	UpdateBookRating(bookID string, rating float64) error
-	GetBook(bookID string) (*models.Book, error)
-	DeleteBook(bookID string) error
+	UpdateBookStatus(req dto.UpdateBookStatusRequest) error
+	UpdateBookRating(req dto.UpdateBookRatingRequest) error
+	GetBook(req dto.GetBookRequest) (*models.Book, error)
+	DeleteBook(req dto.DeleteBookRequest) error
 }
 
 type UserRepository interface {
-	CreateUser(name, email string) (*models.User, error)
-	GetUser(userID string) (*models.User, error)
-	DeleteUser(userID string) error
+	CreateUser(req dto.CreateUserRequest) (*models.User, error)
+	GetUser(req dto.GetUserRequest) (*models.User, error)
+	DeleteUser(req dto.DeleteUserRequest) error
 	GetAllUsers() ([]*models.User, error)
 }

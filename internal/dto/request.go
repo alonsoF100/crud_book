@@ -8,11 +8,25 @@ type CreateBookRequest struct {
 }
 
 type UpdateBookStatusRequest struct {
-	Status string `json:"status" binding:"required,oneof=want reading finished"`
+	BookID string `form:"-" uri:"id" binding:"required"`
+	Status string `form:"status" binding:"omitempty,oneof=want reading finished"`
 }
 
 type UpdateBookRatingRequest struct {
-	Rating float64 `json:"rating" binding:"required,min=0,max=5"`
+	BookID string  `form:"-" uri:"id" binding:"required"`
+	Rating float64 `form:"rating" binding:"omitempty,min=0,max=5"`
+}
+
+type DeleteBookRequest struct {
+	BookID string `uri:"id" binding:"required,uuid"`
+}
+
+type GetBookRequest struct {
+	BookID string `uri:"id" binding:"required,uuid"`
+}
+
+func NewGetBookRequest(bookID string) GetBookRequest {
+	return GetBookRequest{BookID: bookID}
 }
 
 type GetUserBooksRequest struct {
@@ -42,4 +56,12 @@ func (r *GetUserBooksRequest) SetDefaults() {
 type CreateUserRequest struct {
 	Name  string `json:"name" binding:"required"`
 	Email string `json:"email" binding:"required,email"`
+}
+
+type DeleteUserRequest struct {
+	UserID string `uri:"id" binding:"required,uuid"`
+}
+
+type GetUserRequest struct {
+	UserID string `uri:"id" binding:"required,uuid"`
 }

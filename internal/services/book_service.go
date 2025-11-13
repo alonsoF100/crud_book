@@ -14,9 +14,9 @@ func NewBookService(repo storage.BookRepository) *bookServiceImpl {
 	return &bookServiceImpl{repo: repo}
 }
 
-func (s *bookServiceImpl) CreateBook(userID, name, description string) (*models.Book, error) {
+func (s *bookServiceImpl) CreateBook(req dto.CreateBookRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.CreateBook(userID, name, description)
+	return s.repo.CreateBook(req)
 }
 
 func (s *bookServiceImpl) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.Book, error) {
@@ -24,30 +24,31 @@ func (s *bookServiceImpl) GetUserBooks(req dto.GetUserBooksRequest) ([]*models.B
 	return s.repo.GetUserBooks(req)
 }
 
-func (s *bookServiceImpl) UpdateBookStatus(bookID, status string) (*models.Book, error) {
+func (s *bookServiceImpl) UpdateBookStatus(req dto.UpdateBookStatusRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	err := s.repo.UpdateBookStatus(bookID, status)
+	err := s.repo.UpdateBookStatus(req)
 	if err != nil {
 		return nil, err
 	}
-	return s.repo.GetBook(bookID)
+	
+	return s.repo.GetBook(dto.NewGetBookRequest(req.BookID))
 }
 
-func (s *bookServiceImpl) UpdateBookRating(bookID string, rating float64) (*models.Book, error) {
+func (s *bookServiceImpl) UpdateBookRating(req dto.UpdateBookRatingRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	err := s.repo.UpdateBookRating(bookID, rating)
+	err := s.repo.UpdateBookRating(req)
 	if err != nil {
 		return nil, err
 	}
-	return s.repo.GetBook(bookID)
+	return s.repo.GetBook(dto.NewGetBookRequest(req.BookID))
 }
 
-func (s *bookServiceImpl) DeleteBook(bookID string) error {
+func (s *bookServiceImpl) DeleteBook(req dto.DeleteBookRequest) error {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.DeleteBook(bookID)
+	return s.repo.DeleteBook(req)
 }
 
-func (s *bookServiceImpl) GetBook(bookID string) (*models.Book, error) {
+func (s *bookServiceImpl) GetBook(req dto.GetBookRequest) (*models.Book, error) {
 	// TODO Добавить валидацию и бизнес логику
-	return s.repo.GetBook(bookID)
+	return s.repo.GetBook(req)
 }

@@ -23,7 +23,7 @@ func (h *bookHandler) createBook(c *gin.Context) {
 		return
 	}
 
-	book, err := h.bookService.CreateBook(req.UserID, req.Name, req.Description)
+	book, err := h.bookService.CreateBook(req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -38,9 +38,11 @@ func (h *bookHandler) getUserBooks(c *gin.Context) {
 
 	if err := c.ShouldBindUri(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
+		return
 	}
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
+		return
 	}
 	req.SetDefaults()
 
@@ -57,14 +59,19 @@ func (h *bookHandler) getUserBooks(c *gin.Context) {
 func (h *bookHandler) updateBookStatus(c *gin.Context) {
 	var req dto.UpdateBookStatusRequest
 
-	bookID := c.Param("id")
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid JSON"})
+	// 1. Сначала биндим URI (BookID)
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	book, err := h.bookService.UpdateBookStatus(bookID, req.Status)
+	// 2. Биндим JSON (Status)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	book, err := h.bookService.UpdateBookStatus(req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -77,14 +84,19 @@ func (h *bookHandler) updateBookStatus(c *gin.Context) {
 func (h *bookHandler) updateBookRating(c *gin.Context) {
 	var req dto.UpdateBookRatingRequest
 
-	bookID := c.Param("id")
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid JSON"})
+	// 1. Сначала биндим URI (BookID)
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	book, err := h.bookService.UpdateBookRating(bookID, req.Rating)
+	// 2. Биндим JSON (Status)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	book, err := h.bookService.UpdateBookRating(req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -95,9 +107,14 @@ func (h *bookHandler) updateBookRating(c *gin.Context) {
 }
 
 func (h *bookHandler) deleteBook(c *gin.Context) {
-	bookID := c.Param("id")
+	var req dto.DeleteBookRequest
 
-	err := h.bookService.DeleteBook(bookID)
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid book ID"})
+		return
+	}
+
+	err := h.bookService.DeleteBook(req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -107,9 +124,14 @@ func (h *bookHandler) deleteBook(c *gin.Context) {
 }
 
 func (h *bookHandler) getBook(c *gin.Context) {
-	bookID := c.Param("id")
+	var req dto.GetBookRequest
 
-	book, err := h.bookService.GetBook(bookID)
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid book ID"})
+		return
+	}
+
+	book, err := h.bookService.GetBook(req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return

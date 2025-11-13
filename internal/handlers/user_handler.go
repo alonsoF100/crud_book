@@ -23,7 +23,7 @@ func (h *userHandler) createUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.CreateUser(req.Name, req.Email)
+	user, err := h.userService.CreateUser(req)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -34,9 +34,13 @@ func (h *userHandler) createUser(c *gin.Context) {
 }
 
 func (h *userHandler) getUser(c *gin.Context) {
-	userID := c.Param("id")
+	var req dto.GetUserRequest
 
-	user, err := h.userService.GetUser(userID)
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+
+	user, err := h.userService.GetUser(req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return
@@ -47,9 +51,13 @@ func (h *userHandler) getUser(c *gin.Context) {
 }
 
 func (h *userHandler) deleteUser(c *gin.Context) {
-	userID := c.Param("id")
+	var req dto.DeleteUserRequest
 
-	err := h.userService.DeleteUser(userID)
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+
+	err := h.userService.DeleteUser(req)
 	if err != nil {
 		c.JSON(404, gin.H{"error": err.Error()})
 		return

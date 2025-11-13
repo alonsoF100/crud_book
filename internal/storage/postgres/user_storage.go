@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"crud_book/internal/dto"
 	"crud_book/internal/models"
 	"fmt"
 
@@ -17,7 +18,7 @@ func NewUserStorage(db *pgxpool.Pool) *userStorage {
 	return &userStorage{db: db}
 }
 
-func (s *userStorage) CreateUser(name, email string) (*models.User, error) {
+func (s *userStorage) CreateUser(req dto.CreateUserRequest) (*models.User, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO users (id, name, email) 
@@ -25,7 +26,7 @@ func (s *userStorage) CreateUser(name, email string) (*models.User, error) {
 				   RETURNING id, name, email`
 
 	var user models.User
-	err := s.db.QueryRow(context.Background(), query, newID, name, email).
+	err := s.db.QueryRow(context.Background(), query, newID, req.Name, req.Email).
 		Scan(&user.ID, &user.Name, &user.Email)
 	if err != nil {
 		return nil, fmt.Errorf("create user: %w", err)
@@ -34,15 +35,15 @@ func (s *userStorage) CreateUser(name, email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (s *userStorage) GetUser(userID string) (*models.User, error) {
+func (s *userStorage) GetUser(req dto.GetUserRequest) (*models.User, error) {
 	const query = `SELECT id, name, email
 	               FROM users WHERE id = $1`
 
 	var user models.User
-	err := s.db.QueryRow(context.Background(), query, userID).Scan(&user.ID, &user.Name, &user.Email)
+	err := s.db.QueryRow(context.Background(), query, req.UserID).Scan(&user.ID, &user.Name, &user.Email)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
-			return nil, fmt.Errorf("failed to find user with ID: %s", userID)
+			return nil, fmt.Errorf("failed to find user with ID: %s", req.UserID)
 		}
 
 		return nil, fmt.Errorf("database error: %w", err)
@@ -78,16 +79,16 @@ func (s *userStorage) GetAllUsers() ([]*models.User, error) {
 	return users, nil
 }
 
-func (s *userStorage) DeleteUser(userID string) error {
+func (s *userStorage) DeleteUser(req dto.DeleteUserRequest) error {
 	const query = `DELETE FROM users WHERE id = $1`
 
-	result, err := s.db.Exec(context.Background(), query, userID)
+	result, err := s.db.Exec(context.Background(), query, req.UserID)
 	if err != nil {
 		return fmt.Errorf("delete user: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("failed find user with ID: %s", userID)
+		return fmt.Errorf("failed find user with ID: %s", req.UserID)
 	}
 
 	return nil

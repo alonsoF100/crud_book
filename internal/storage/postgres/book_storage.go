@@ -19,7 +19,7 @@ func NewBookStorage(db *pgxpool.Pool) *bookStorage {
 	return &bookStorage{db: db}
 }
 
-func (s *bookStorage) CreateBook(userID, name, description string) (*models.Book, error) {
+func (s *bookStorage) CreateBook(req dto.CreateBookRequest) (*models.Book, error) {
 	newID := uuid.New().String()
 
 	const query = `INSERT INTO books (id, user_id, name, description)
@@ -27,7 +27,7 @@ func (s *bookStorage) CreateBook(userID, name, description string) (*models.Book
 				   RETURNING id, user_id, name, description, rating, status, created_at`
 				   
 	var book models.Book
-	err := s.db.QueryRow(context.Background(), query, newID, userID, name, description).
+	err := s.db.QueryRow(context.Background(), query, newID, req.UserID, req.Name, req.Description).
 		Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("create book: %w", err)
@@ -36,65 +36,65 @@ func (s *bookStorage) CreateBook(userID, name, description string) (*models.Book
 	return &book, nil
 }
 
-func (s *bookStorage) UpdateBookStatus(bookID, status string) error {
+func (s *bookStorage) UpdateBookStatus(req dto.UpdateBookStatusRequest) error {
 	const query = `UPDATE books
 	               SET status = $1
 	               WHERE id = $2`
 
-	result, err := s.db.Exec(context.Background(), query, status, bookID)
+	result, err := s.db.Exec(context.Background(), query, req.Status, req.BookID)
 	if err != nil {
 		return fmt.Errorf("update book status: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("failed to find book with ID: %s", bookID)
+		return fmt.Errorf("failed to find book with ID: %s", req.BookID)
 	}
 
 	return nil
 }
 
-func (s *bookStorage) UpdateBookRating(bookID string, rating float64) error {
+func (s *bookStorage) UpdateBookRating(req dto.UpdateBookRatingRequest) error {
 	const query = `UPDATE books
 	               SET rating = $1
 				   WHERE id = $2`
 
-	result, err := s.db.Exec(context.Background(), query, rating, bookID)
+	result, err := s.db.Exec(context.Background(), query, req.Rating, req.BookID)
 	if err != nil {
 		return fmt.Errorf("update book rating: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("failed to find book with ID: %s", bookID)
+		return fmt.Errorf("failed to find book with ID: %s", req.BookID)
 	}
 
 	return nil
 }
 
-func (s *bookStorage) DeleteBook(bookID string) error {
+func (s *bookStorage) DeleteBook(req dto.DeleteBookRequest) error {
 	const query = `DELETE FROM books
 	               WHERE id = $1`
 
-	result, err := s.db.Exec(context.Background(), query, bookID)
+	result, err := s.db.Exec(context.Background(), query, req.BookID)
 	if err != nil {
 		return fmt.Errorf("delete book: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("failed find book with ID: %s", bookID)
+		return fmt.Errorf("failed find book with ID: %s", req.BookID)
 	}
 
 	return nil
 }
 
-func (s *bookStorage) GetBook(bookID string) (*models.Book, error) {
+func (s *bookStorage) GetBook(req dto.GetBookRequest) (*models.Book, error) {
 	const query = `SELECT id, user_id, name, description, rating, status, created_at
 	               FROM books WHERE id = $1`
 
 	var book models.Book
-	err := s.db.QueryRow(context.Background(), query, bookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
+	err := s.db.QueryRow(context.Background(), query, req.BookID).Scan(&book.ID, &book.UserID, &book.Name, &book.Description, &book.Rating, &book.Status, &book.CreatedAt)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
-			return nil, fmt.Errorf("failed to find book with ID: %s", bookID)
+			return nil, fmt.Errorf("failed to find book with ID: %s", req.BookID)
 		}
 
 		return nil, fmt.Errorf("database error: %w", err)
